@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lo spettro inquieto: Un rapporto interattivo sul romanticismo</title>
+    <!-- Chosen Palette: Terra & Sky -->
+    <!-- Application Structure Plan: The application is designed as a non-linear, thematic exploration rather than a simple scrollable report. The structure centers on the core thesis: the duality of Romanticism's legacy and its ongoing conflict with Enlightenment ideals. The architecture has four main sections, accessible via a sticky navigation: 1) 'The Core Conflict' introduces the thesis. 2) 'The Romantic DNA' allows users to interactively explore the five core tenets and their dual enlightened/authoritarian manifestations, replacing the static table from the report. 3) 'The Inheritance' uses a simplified, clickable timeline to trace the evolution from ideas to political movements like fascism and populism. 4) 'The Modern Battlefield' presents the contemporary case studies (populism, public health, environment) using interactive charts and diagrams to make the abstract arguments tangible. This structure was chosen because the report's power lies in its connections and paradoxes, which a user can better understand by navigating between themes, comparing ideas, and interacting with the data, rather than reading linearly. The goal is synthesis and discovery, not just presentation. -->
+    <!-- Visualization & Content Choices: 1) Core Tenets Diagram: Report Info -> Table of dual tenets. Goal -> Show the central paradox. Viz -> Interactive HTML/CSS diagram where clicking a tenet (e.g., 'Individual') reveals two cards for its 'Liberal' and 'Authoritarian' sides. Justification -> More engaging and memorable than a static table. 2) Ideological Divergence Chart: Report Info -> Analysis of liberalism vs. nationalism/fascism. Goal -> Compare ideologies based on Romantic traits. Viz -> Grouped Bar Chart (Chart.js) comparing ideologies on axes like 'Emotional Appeal' or 'Mythic Past'. Justification -> Quantifies and clarifies the qualitative analysis of divergent political paths. 3) Populist Rhetoric Chart: Report Info -> Analysis of Trump's rally speeches. Goal -> Deconstruct populist spectacle. Viz -> Stacked Bar Chart (Chart.js) breaking down rhetoric into components ('Crisis Narrative', 'Blame', 'Solution'). Justification -> Makes the abstract concept of political spectacle easy to analyze. 4) Epistemological Gulf Diagram: Report Info -> Conflict between scientific empiricism and romantic subjectivity. Goal -> Clarify the two opposing paths to "truth". Viz -> Two-column HTML/CSS diagram. Justification -> Simplifies a complex philosophical conflict into a clear visual comparison, central to the anti-science thesis. All interactions are handled with vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <!-- PWA Enhancements -->
+    <meta name="theme-color" content="#f9fafb"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Spettro Inquieto">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/f97316/FFFFFF/png?text=SI">
+    <link rel="manifest" href="manifest.it.json">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Lora', serif; }
+        .nav-link { transition: color 0.3s, border-color 0.3s; }
+        .nav-link.active { color: #f97316; border-bottom-color: #f97316; }
+        .nav-link:hover { color: #fb923c; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .tenet-card, .manifestation-card, .timeline-card { transition: all 0.3s ease-in-out; }
+        .manifestation-card.hidden-card { opacity: 0; transform: scale(0.95); pointer-events: none; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 400px; max-height: 50vh; }
+        @media (min-width: 768px) { .chart-container { height: 450px; } }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+
+        <header class="text-center py-12 md:py-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-stone-900">Lo spettro inquieto</h1>
+            <p class="mt-4 text-lg md:text-xl text-stone-600 font-serif italic">Un rapporto interattivo sull'influenza duratura del romanticismo</p>
+        </header>
+
+        <nav id="main-nav" class="sticky top-0 z-10 bg-stone-50/80 backdrop-blur-md border-b border-stone-200 mb-8">
+            <ul class="flex items-center justify-center space-x-4 sm:space-x-8 py-3 text-sm sm:text-base font-semibold text-stone-500">
+                <li><a href="#conflict" class="nav-link py-2 border-b-2 border-transparent">Il conflitto centrale</a></li>
+                <li><a href="#dna" class="nav-link py-2 border-b-2 border-transparent">Il DNA romantico</a></li>
+                <li><a href="#inheritance" class="nav-link py-2 border-b-2 border-transparent">L'eredità</a></li>
+                <li><a href="#battlefield" class="nav-link py-2 border-b-2 border-transparent">Il campo di battaglia moderno</a></li>
+            </ul>
+        </nav>
+
+        <main id="main-content">
+            <section id="conflict" class="content-section min-h-[60vh] flex items-center justify-center">
+                <div class="text-center max-w-4xl mx-auto py-12">
+                    <h2 class="text-3xl font-bold text-orange-600">La rivoluzione persistente</h2>
+                    <p class="mt-6 text-lg text-stone-700 leading-relaxed">
+                        Questa applicazione esplora la tesi secondo cui il romanticismo non è mai finito. I suoi valori fondamentali — il primato dell'emozione, l'esperienza soggettiva e l'individuo eroico — sono diventati un sistema operativo nascosto della vita moderna. Ciò ha creato una guerra lunga due secoli tra la visione del mondo romantica e l'eredità di razionalismo dell'illuminismo. Laddove l'illuminismo cerca la verità attraverso fatti oggettivi, il romanticismo la trova nell'intuizione e nella credenza personale. Questo rapporto interattivo analizza quel conflitto, mostrando come esso modelli ogni cosa, dalla nostra politica alla nostra percezione della realtà stessa.
+                    </p>
+                    <div class="mt-12 p-6 bg-white rounded-xl shadow-lg border border-stone-200">
+                        <h3 class="font-bold text-xl text-stone-800">La tesi centrale</h3>
+                        <p class="mt-2 text-stone-600">L'era contemporanea della "post-verità" è il campo di battaglia più recente e pericoloso di questo conflitto, dove i fatti oggettivi sono meno influenti degli appelli all'emozione e alla credenza personale. Usa la navigazione in alto per esplorare come siamo arrivati a questo punto.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dna" class="content-section">
+                <div class="text-center max-w-4xl mx-auto py-12">
+                    <h2 class="text-3xl font-bold text-orange-600">Il DNA romantico</h2>
+                     <p class="mt-6 text-lg text-stone-700 leading-relaxed">
+                        Nel suo cuore, il romanticismo è definito da alcuni principi fondamentali. Ma ognuno di questi principi contiene un paradosso, dando origine sia a ideali illuminati e liberali, sia alle loro controparti autoritarie e negative. Clicca su un principio qui sotto per vederne la duplice eredità. Questo diagramma interattivo sostituisce la tabella statica del rapporto originale per illustrare meglio le tensioni centrali.
+                    </p>
+                </div>
+                <div class="mt-8">
+                    <div id="tenets-container" class="flex flex-wrap justify-center gap-4 mb-8">
+                    </div>
+                    <div id="manifestations-container" class="grid grid-cols-1 md:grid-cols-2 gap-8 min-h-[20rem]">
+                    </div>
+                </div>
+            </section>
+
+            <section id="inheritance" class="content-section">
+                <div class="text-center max-w-4xl mx-auto py-12">
+                    <h2 class="text-3xl font-bold text-orange-600">L'eredità: una storia visiva</h2>
+                    <p class="mt-6 text-lg text-stone-700 leading-relaxed">
+                        Le idee romantiche non sono rimaste nei libri e nei dipinti. Si sono evolute e sono state armate, modellando il panorama politico del mondo moderno. Questa sezione visualizza il viaggio dal concetto filosofico alla realtà politica, tracciando una linea diretta dal nazionalismo romantico agli spettacoli autoritari del XX e XXI secolo. Il grafico sottostante mostra come diverse ideologie abbiano ereditato e distorto i tratti romantici.
+                    </p>
+                </div>
+                <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg border border-stone-200">
+                    <h3 class="text-xl font-bold text-center mb-4 text-stone-800">Divergenza ideologica: l'eredità romantica</h3>
+                    <div class="chart-container">
+                        <canvas id="ideologyChart"></canvas>
+                    </div>
+                    <p class="text-center mt-4 text-sm text-stone-500">Questo grafico confronta come le ideologie chiave attingano ai principi romantici. Notare come il fascismo massimizzi l'uso dell'emozione e del mito, mentre il liberalismo enfatizza l'individualismo ma rifiuta uno stato basato sul mito.</p>
+                </div>
+            </section>
+
+            <section id="battlefield" class="content-section">
+                <div class="text-center max-w-4xl mx-auto py-12">
+                    <h2 class="text-3xl font-bold text-orange-600">Il campo di battaglia moderno</h2>
+                    <p class="mt-6 text-lg text-stone-700 leading-relaxed">
+                        Il conflitto tra la soggettività romantica e l'empirismo scientifico è oggi più visibile nel nostro discorso pubblico su politica, salute e ambiente. Questa sezione presenta casi di studio interattivi che analizzano questi scontri contemporanei, rivelando il manuale romantico in azione.
+                    </p>
+                </div>
+                <div class="space-y-16">
+                    <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg border border-stone-200">
+                        <h3 class="text-xl font-bold text-center mb-4 text-stone-800">Caso di studio 1: lo spettacolo populista</h3>
+                        <p class="text-center max-w-3xl mx-auto text-stone-600 mb-6">I movimenti populisti autoritari, come il fascismo del XX secolo, impiegano una forma di teatro politico. Non vincono le discussioni con i fatti; costruiscono la lealtà attraverso un'esperienza emotiva condivisa. Il grafico sottostante smonta questo metodo, analizzando le componenti tipiche della retorica populista.</p>
+                        <div class="chart-container">
+                            <canvas id="populistChart"></canvas>
+                        </div>
+                         <p class="text-center mt-4 text-sm text-stone-500">L'obiettivo non è la persuasione ma la trasformazione emotiva, creando un legame che bypassa il pensiero critico. Questa è l'estetizzazione della politica nell'era moderna.</p>
+                    </div>
+
+                    <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg border border-stone-200">
+                        <h3 class="text-xl font-bold text-center mb-4 text-stone-800">Caso di studio 2: la guerra alla realtà</h3>
+                         <p class="text-center max-w-3xl mx-auto text-stone-600 mb-8">La negazione del consenso scientifico non è solo una questione di disinformazione. È uno scontro di visioni del mondo. Il diagramma sottostante contrappone i due metodi opposti per arrivare alla "verità" che sono al centro del conflitto su questioni come la salute pubblica e il cambiamento climatico.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="border-2 border-sky-300 bg-sky-50 p-6 rounded-lg">
+                                <h4 class="text-lg font-bold text-sky-800 text-center">Il metodo illuminista (empirismo)</h4>
+                                <ul class="mt-4 space-y-2 text-sky-900">
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">1.</span> <span>Osservazione del mondo esterno e oggettivo.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">2.</span> <span>Formulazione di un'ipotesi verificabile.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">3.</span> <span>Sperimentazione rigorosa e replicabile.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">4.</span> <span>Revisione paritaria e validazione collettiva.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">→</span> <span class="font-semibold">Consenso provvisorio, basato sull'evidenza.</span></li>
+                                </ul>
+                            </div>
+                             <div class="border-2 border-rose-300 bg-rose-50 p-6 rounded-lg">
+                                <h4 class="text-lg font-bold text-rose-800 text-center">Il metodo romantico (soggettività)</h4>
+                                <ul class="mt-4 space-y-2 text-rose-900">
+                                    <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">1.</span> <span>Primato del sentimento interno e soggettivo.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">2.</span> <span>Affidamento all'intuizione e all'aneddoto personale.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">3.</span> <span>Validazione attraverso l'esperienza personale o la credenza di gruppo.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">4.</span> <span>Rifiuto dell'autorità esterna che contraddice la credenza.</span></li>
+                                     <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">→</span> <span class="font-semibold">"Verità personale" inviolabile e auto-validata.</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                         <p class="text-center mt-6 text-stone-600">Questa divisione fondamentale spiega perché presentare "più fatti" spesso fallisce. Il dibattito non riguarda i dati; riguarda quale metodo di conoscenza detiene l'autorità ultima: l'evidenza o il sé.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center py-12 mt-8 border-t border-stone-200">
+            <h3 class="text-xl font-bold text-stone-800">Conclusione: la morte lenta che non arriva mai</h3>
+            <p class="mt-4 max-w-4xl mx-auto text-stone-600 leading-relaxed">
+                Il romanticismo non è morto; è un'eredità volatile e paradossale. È la fonte dei nostri più cari ideali di libertà individuale e delle nostre più pericolose patologie politiche di irrazionalismo di massa. La sfida del XXI secolo è navigare in questa eredità a doppio taglio: sfruttare il potere empatico dello spirito romantico difendendosi dalla sua guerra seducente, e potenzialmente fatale, contro la ragione.
+            </p>
+        </footer>
+
+    </div>
+
+<script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.it.js').then(registration => {
+                console.log('Registrazione ServiceWorker riuscita con scope: ', registration.scope);
+            }, err => {
+                console.log('Registrazione ServiceWorker fallita: ', err);
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+    
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.content-section');
+        const mainContent = document.getElementById('main-content');
+
+        const tenetData = [
+            { 
+                name: "L'individuo", 
+                icon: '👤',
+                liberal: { title: 'Diritti umani e autodeterminazione', desc: 'La credenza nell\'unicità del sé e il rifiuto delle norme sociali forniscono il terreno filosofico per gli ideali liberali di libertà, auto-espressione e sacralità della coscienza.' },
+                authoritarian: { title: 'Soggettivismo radicale e solipsismo', desc: 'Quando radicalizzato, il focus sul sé può giustificare un rifiuto solipsistico della realtà oggettiva e del contratto sociale, portando al puro interesse personale.' }
+            },
+            { 
+                name: 'Emozione', 
+                icon: '❤️‍🔥',
+                liberal: { title: 'Arte empatica e compassione sociale', desc: "Il potere dell'emozione può alimentare l'empatia, ispirare arte che ci connette e guidare movimenti per la giustizia sociale basati sulla compassione condivisa." },
+                authoritarian: { title: 'Mentalità di massa e governo della passione', desc: "Quando sfruttata per la politica, l'emozione può essere usata per incitare l'odio di massa, bypassare il dibattito razionale e giustificare azioni basate sulla passione pura piuttosto che sull'evidenza." }
+            },
+            { 
+                name: 'Il passato', 
+                icon: '🏰',
+                liberal: { title: 'Orgoglio culturale e coscienza storica', desc: 'Una riverenza per il passato può promuovere l\'orgoglio culturale, la conservazione del folklore e della storia, e un sano senso di identità e continuità nazionale.' },
+                authoritarian: { title: 'Nazionalismo aggressivo e creazione di miti', desc: 'La glorificazione del passato spesso si trasforma in nazionalismo aggressivo, usando una storia mitizzata ed escludente per giustificare le ambizioni politiche e i conflitti odierni.' }
+            },
+            { 
+                name: "L'eroe", 
+                icon: '🌟',
+                liberal: { title: 'Celebrazione dei pensatori visionari', desc: 'Il culto del genio celebra artisti, scienziati e pensatori visionari che aprono nuove strade e spingono l\'umanità in avanti attraverso i loro talenti unici.' },
+                authoritarian: { title: 'Il dittatore carismatico e il culto della personalità', desc: "Questo ideale diventa politicamente tossico quando si trasforma nel culto del dittatore carismatico, che richiede un'obbedienza incondizionata a un unico leader quasi divino." }
+            },
+            { 
+                name: 'Natura', 
+                icon: '🌿',
+                liberal: { title: 'Ambientalismo e conservazione', desc: 'Una connessione spirituale con la natura e una visione di essa come sacra sono le fondamenta del movimento ambientalista moderno e degli sforzi per conservare il pianeta.' },
+                authoritarian: { title: 'Anti-industrialismo romanticizzato', desc: "Ciò può portare a una visione romanticizzata e non scientifica dell'ecologia che a volte si oppone a soluzioni necessarie e basate sui dati in favore di una visione idealizzata e 'incontaminata'." }
+            }
+        ];
+
+        const tenetsContainer = document.getElementById('tenets-container');
+        const manifestationsContainer = document.getElementById('manifestations-container');
+        let activeTenet = null;
+        
+        function initDnaSection() {
+            tenetData.forEach((tenet, index) => {
+                const button = document.createElement('button');
+                button.className = 'tenet-card px-4 py-2 bg-white border-2 border-stone-300 rounded-full font-semibold text-stone-700 hover:bg-orange-100 hover:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2';
+                button.innerHTML = `<span class="mr-2">${tenet.icon}</span> ${tenet.name}`;
+                button.addEventListener('click', () => selectTenet(tenet, button));
+                tenetsContainer.appendChild(button);
+                if(index === 0) {
+                    selectTenet(tenet, button);
+                }
+            });
+        }
+        
+        function selectTenet(tenet, button) {
+            if (activeTenet) {
+                activeTenet.classList.remove('bg-orange-500', 'text-white', 'border-orange-500');
+                activeTenet.classList.add('bg-white', 'text-stone-700', 'border-stone-300');
+            }
+            
+            button.classList.add('bg-orange-500', 'text-white', 'border-orange-500');
+            button.classList.remove('bg-white', 'text-stone-700', 'border-stone-300');
+            activeTenet = button;
+
+            manifestationsContainer.innerHTML = '';
+            
+            const liberalCard = createManifestationCard(tenet.liberal, 'liberal');
+            const authoritarianCard = createManifestationCard(tenet.authoritarian, 'authoritarian');
+
+            manifestationsContainer.appendChild(liberalCard);
+            manifestationsContainer.appendChild(authoritarianCard);
+
+            setTimeout(() => {
+                liberalCard.classList.remove('hidden-card');
+                authoritarianCard.classList.remove('hidden-card');
+            }, 50);
+        }
+
+        function createManifestationCard(data, type) {
+            const card = document.createElement('div');
+            const borderColor = type === 'liberal' ? 'border-sky-300' : 'border-rose-300';
+            const bgColor = type === 'liberal' ? 'bg-sky-50' : 'bg-rose-50';
+            const titleColor = type === 'liberal' ? 'text-sky-800' : 'text-rose-800';
+            const textColor = type === 'liberal' ? 'text-sky-900' : 'text-rose-900';
+            const labelText = type === 'liberal' ? 'Illuminata / Liberale' : 'Autoritaria / Negativa';
+
+            card.className = `manifestation-card hidden-card p-6 rounded-lg border-2 ${borderColor} ${bgColor}`;
+            card.innerHTML = `
+                <span class="inline-block px-3 py-1 text-xs font-semibold ${titleColor} ${bgColor === 'bg-sky-50' ? 'bg-sky-200' : 'bg-rose-200'} rounded-full mb-3">${labelText}</span>
+                <h4 class="text-xl font-bold ${titleColor}">${data.title}</h4>
+                <p class="mt-2 ${textColor}">${data.desc}</p>
+            `;
+            return card;
+        }
+
+        const chartContexts = {};
+
+        function initCharts(sectionId) {
+            if (sectionId === 'inheritance' && !chartContexts.ideologyChart) {
+                const ctx = document.getElementById('ideologyChart').getContext('2d');
+                chartContexts.ideologyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Individualismo', 'Appello emotivo', 'Passato mitico', 'Culto dell\'eroe'],
+                        datasets: [
+                            {
+                                label: 'Liberalismo',
+                                data: [9, 6, 2, 3],
+                                backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                                borderColor: 'rgba(56, 189, 248, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Nazionalismo',
+                                data: [4, 8, 9, 5],
+                                backgroundColor: 'rgba(251, 113, 133, 0.6)',
+                                borderColor: 'rgba(251, 113, 133, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Fascismo',
+                                data: [1, 10, 10, 10],
+                                 backgroundColor: 'rgba(120, 113, 108, 0.6)',
+                                borderColor: 'rgba(120, 113, 108, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                title: { display: true, text: 'Adesione al principio romantico (punteggio 1-10)' }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    footer: (tooltipItems) => 'Mostra un punteggio semplificato di quanto ogni ideologia si basi su un dato tratto romantico.'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            if (sectionId === 'battlefield' && !chartContexts.populistChart) {
+                const ctx = document.getElementById('populistChart').getContext('2d');
+                chartContexts.populistChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ["Analisi retorica del comizio populista"],
+                        datasets: [
+                            {
+                                label: 'Narrativa della crisi (creare paura)',
+                                data: [30],
+                                backgroundColor: 'rgba(251, 146, 60, 0.7)',
+                            },
+                            {
+                                label: 'Identificazione dei nemici (colpa)',
+                                data: [35],
+                                backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            },
+                            {
+                                label: "Offerta di una soluzione eroica (il leader)",
+                                data: [25],
+                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            },
+                             {
+                                label: 'Elevazione emotiva e appartenenza',
+                                data: [10],
+                                backgroundColor: 'rgba(245, 208, 254, 0.8)',
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: true,
+                                title: { display: true, text: 'Percentuale del focus retorico' }
+                            },
+                            y: {
+                                stacked: true
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    footer: (tooltipItems) => "Ogni segmento rappresenta una tattica fondamentale usata per mobilitare un pubblico emotivamente, non razionalmente."
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+
+        function updateContent(hash) {
+            let targetHash = hash || window.location.hash || '#conflict';
+            if (targetHash.length <= 1) targetHash = '#conflict';
+
+            let activeSectionFound = false;
+            sections.forEach(section => {
+                if ('#' + section.id === targetHash) {
+                    section.classList.add('active');
+                    mainContent.style.minHeight = section.offsetHeight + 'px';
+                    initCharts(section.id);
+                    activeSectionFound = true;
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+            
+            if (!activeSectionFound) {
+                document.getElementById('conflict').classList.add('active');
+            }
+
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === targetHash) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetHash = e.currentTarget.getAttribute('href');
+                history.pushState(null, null, targetHash);
+                updateContent(targetHash);
+            });
+        });
+
+        window.addEventListener('popstate', () => updateContent());
+        
+        initDnaSection();
+        updateContent();
+    });
+</script>
+
+</body>
+</html>
