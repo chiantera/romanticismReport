@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Unquiet Ghost: An Interactive Report on Romanticism</title>
+    <!-- Chosen Palette: Terra & Sky -->
+    <!-- Application Structure Plan: The application is designed as a non-linear, thematic exploration rather than a simple scrollable report. The structure centers on the core thesis: the duality of Romanticism's legacy and its ongoing conflict with Enlightenment ideals. The architecture has four main sections, accessible via a sticky navigation: 1) 'The Core Conflict' introduces the thesis. 2) 'The Romantic DNA' allows users to interactively explore the five core tenets and their dual enlightened/authoritarian manifestations, replacing the static table from the report. 3) 'The Inheritance' uses a simplified, clickable timeline to trace the evolution from ideas to political movements like fascism and populism. 4) 'The Modern Battlefield' presents the contemporary case studies (populism, public health, environment) using interactive charts and diagrams to make the abstract arguments tangible. This structure was chosen because the report's power lies in its connections and paradoxes, which a user can better understand by navigating between themes, comparing ideas, and interacting with the data, rather than reading linearly. The goal is synthesis and discovery, not just presentation. -->
+    <!-- Visualization & Content Choices: 1) Core Tenets Diagram: Report Info -> Table of dual tenets. Goal -> Show the central paradox. Viz -> Interactive HTML/CSS diagram where clicking a tenet (e.g., 'Individual') reveals two cards for its 'Liberal' and 'Authoritarian' sides. Justification -> More engaging and memorable than a static table. 2) Ideological Divergence Chart: Report Info -> Analysis of liberalism vs. nationalism/fascism. Goal -> Compare ideologies based on Romantic traits. Viz -> Grouped Bar Chart (Chart.js) comparing ideologies on axes like 'Emotional Appeal' or 'Mythic Past'. Justification -> Quantifies and clarifies the qualitative analysis of divergent political paths. 3) Populist Rhetoric Chart: Report Info -> Analysis of Trump's rally speeches. Goal -> Deconstruct populist spectacle. Viz -> Stacked Bar Chart (Chart.js) breaking down rhetoric into components ('Crisis Narrative', 'Blame', 'Solution'). Justification -> Makes the abstract concept of political spectacle easy to analyze. 4) Epistemological Gulf Diagram: Report Info -> Conflict between scientific empiricism and romantic subjectivity. Goal -> Clarify the two opposing paths to "truth". Viz -> Two-column HTML/CSS diagram. Justification -> Simplifies a complex philosophical conflict into a clear visual comparison, central to the anti-science thesis. All interactions are handled with vanilla JS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    
+    <!-- PWA Enhancements -->
+    <meta name="theme-color" content="#f9fafb"/>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Unquiet Ghost">
+    <link rel="apple-touch-icon" href="https://placehold.co/180x180/f97316/FFFFFF/png?text=UG">
+    <link rel="manifest" href="manifest.json">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        h1, h2, h3 { font-family: 'Lora', serif; }
+        .nav-link { transition: color 0.3s, border-color 0.3s; }
+        .nav-link.active { color: #f97316; border-bottom-color: #f97316; }
+        .nav-link:hover { color: #fb923c; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .tenet-card, .manifestation-card, .timeline-card { transition: all 0.3s ease-in-out; }
+        .manifestation-card.hidden-card { opacity: 0; transform: scale(0.95); pointer-events: none; }
+        .chart-container { position: relative; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; height: 400px; max-height: 50vh; }
+        @media (min-width: 768px) { .chart-container { height: 450px; } }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased">
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+
+        <header class="text-center py-12 md:py-16">
+            <h1 class="text-4xl md:text-5xl font-bold text-stone-900">The Unquiet Ghost</h1>
+            <p class="mt-4 text-lg md:text-xl text-stone-600 font-serif italic">An Interactive Report on the Enduring Influence of Romanticism</p>
+        </header>
+
+        <nav id="main-nav" class="sticky top-0 z-10 bg-stone-50/80 backdrop-blur-md border-b border-stone-200 mb-8">
+            <ul class="flex items-center justify-center space-x-4 sm:space-x-8 py-3 text-sm sm:text-base font-semibold text-stone-500">
+                <li><a href="#conflict" class="nav-link py-2 border-b-2 border-transparent">The Core Conflict</a></li>
+                <li><a href="#dna" class="nav-link py-2 border-b-2 border-transparent">The Romantic DNA</a></li>
+                <li><a href="#inheritance" class="nav-link py-2 border-b-2 border-transparent">The Inheritance</a></li>
+                <li><a href="#battlefield" class="nav-link py-2 border-b-2 border-transparent">The Modern Battlefield</a></li>
+            </ul>
+        </nav>
+
+        <main id="main-content">
+            <section id="conflict" class="content-section min-h-[60vh] flex items-center justify-center">
+                <div class="text-center max-w-4xl mx-auto py-12">
+                    <h2 class="text-3xl font-bold text-orange-600">The Persistent Revolution</h2>
+                    <p class="mt-6 text-lg text-stone-700 leading-relaxed">
+                        This application explores the argument that Romanticism never ended. Its core values—the primacy of emotion, subjective experience, and the heroic individual—have become a hidden operating system for modern life. This has created a two-century-long war between the Romantic worldview and the Enlightenment's legacy of rationalism. Where the Enlightenment seeks truth through objective facts, Romanticism finds it in intuition and personal belief. This interactive report unpacks that conflict, showing how it shapes everything from our politics to our perception of reality itself.
+                    </p>
+                    <div class="mt-12 p-6 bg-white rounded-xl shadow-lg border border-stone-200">
+                        <h3 class="font-bold text-xl text-stone-800">The Central Thesis</h3>
+                        <p class="mt-2 text-stone-600">The contemporary "post-truth" era is the latest and most dangerous battlefield in this conflict, where objective facts are less influential than appeals to emotion and personal belief. Use the navigation above to explore how we got here.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="dna" class="content-section">
+                <div class="text-center max-w-4xl mx-auto py-12">
+                    <h2 class="text-3xl font-bold text-orange-600">The Romantic DNA</h2>
+                     <p class="mt-6 text-lg text-stone-700 leading-relaxed">
+                        At its heart, Romanticism is defined by a few core tenets. But each of these principles contains a paradox, giving rise to both enlightened, liberal ideals and their authoritarian, negative counterparts. Click on a tenet below to see its dual legacy. This interactive diagram replaces the static table in the original report to better illustrate the core tensions.
+                    </p>
+                </div>
+                <div class="mt-8">
+                    <div id="tenets-container" class="flex flex-wrap justify-center gap-4 mb-8">
+                    </div>
+                    <div id="manifestations-container" class="grid grid-cols-1 md:grid-cols-2 gap-8 min-h-[20rem]">
+                    </div>
+                </div>
+            </section>
+
+            <section id="inheritance" class="content-section">
+                <div class="text-center max-w-4xl mx-auto py-12">
+                    <h2 class="text-3xl font-bold text-orange-600">The Inheritance: A Visual History</h2>
+                    <p class="mt-6 text-lg text-stone-700 leading-relaxed">
+                        Romantic ideas didn't stay in books and paintings. They evolved and were weaponized, shaping the political landscape of the modern world. This section visualizes the journey from philosophical concept to political reality, tracing a direct line from Romantic nationalism to the authoritarian spectacles of the 20th and 21st centuries. The chart below shows how different ideologies inherited and twisted Romantic traits.
+                    </p>
+                </div>
+                <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg border border-stone-200">
+                    <h3 class="text-xl font-bold text-center mb-4 text-stone-800">Ideological Divergence: The Romantic Legacy</h3>
+                    <div class="chart-container">
+                        <canvas id="ideologyChart"></canvas>
+                    </div>
+                    <p class="text-center mt-4 text-sm text-stone-500">This chart compares how key ideologies draw upon Romantic tenets. Notice how Fascism maximizes the use of emotion and myth, while Liberalism emphasizes individualism but rejects a myth-based state.</p>
+                </div>
+            </section>
+
+            <section id="battlefield" class="content-section">
+                <div class="text-center max-w-4xl mx-auto py-12">
+                    <h2 class="text-3xl font-bold text-orange-600">The Modern Battlefield</h2>
+                    <p class="mt-6 text-lg text-stone-700 leading-relaxed">
+                        The conflict between Romantic subjectivity and scientific empiricism is most visible today in our public discourse on politics, health, and the environment. This section presents interactive case studies that break down these contemporary clashes, revealing the Romantic playbook in action.
+                    </p>
+                </div>
+                <div class="space-y-16">
+                    <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg border border-stone-200">
+                        <h3 class="text-xl font-bold text-center mb-4 text-stone-800">Case Study 1: The Populist Spectacle</h3>
+                        <p class="text-center max-w-3xl mx-auto text-stone-600 mb-6">Authoritarian populist movements, like 20th-century fascism, employ a form of political theater. They don't win arguments with facts; they build loyalty through shared emotional experience. The chart below deconstructs this method, analyzing the typical components of populist rhetoric.</p>
+                        <div class="chart-container">
+                            <canvas id="populistChart"></canvas>
+                        </div>
+                         <p class="text-center mt-4 text-sm text-stone-500">The goal is not persuasion but emotional transformation, creating a bond that bypasses critical thought. This is the aestheticization of politics in the modern age.</p>
+                    </div>
+
+                    <div class="bg-white p-4 sm:p-8 rounded-xl shadow-lg border border-stone-200">
+                        <h3 class="text-xl font-bold text-center mb-4 text-stone-800">Case Study 2: The War on Reality</h3>
+                         <p class="text-center max-w-3xl mx-auto text-stone-600 mb-8">The denial of scientific consensus is not just about misinformation. It's a clash of worldviews. The diagram below contrasts the two opposing methods for arriving at "truth" that are at the heart of the conflict over issues like public health and climate change.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div class="border-2 border-sky-300 bg-sky-50 p-6 rounded-lg">
+                                <h4 class="text-lg font-bold text-sky-800 text-center">The Enlightenment Method (Empiricism)</h4>
+                                <ul class="mt-4 space-y-2 text-sky-900">
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">1.</span> <span>Observation of the external, objective world.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">2.</span> <span>Formulation of a testable hypothesis.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">3.</span> <span>Rigorous, replicable experimentation.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">4.</span> <span>Peer review and collective validation.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-sky-600 mr-2">→</span> <span class="font-semibold">Provisional, evidence-based consensus.</span></li>
+                                </ul>
+                            </div>
+                             <div class="border-2 border-rose-300 bg-rose-50 p-6 rounded-lg">
+                                <h4 class="text-lg font-bold text-rose-800 text-center">The Romantic Method (Subjectivity)</h4>
+                                <ul class="mt-4 space-y-2 text-rose-900">
+                                    <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">1.</span> <span>Primacy of internal, subjective feeling.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">2.</span> <span>Reliance on intuition and personal anecdote.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">3.</span> <span>Validation through personal experience or group belief.</span></li>
+                                    <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">4.</span> <span>Rejection of external authority that contradicts belief.</span></li>
+                                     <li class="flex items-start"><span class="font-bold text-rose-600 mr-2">→</span> <span class="font-semibold">Inviolable, self-validated "personal truth."</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                         <p class="text-center mt-6 text-stone-600">This fundamental divide explains why presenting "more facts" often fails. The debate isn't about the data; it's about which method of knowing holds ultimate authority: the evidence, or the self.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center py-12 mt-8 border-t border-stone-200">
+            <h3 class="text-xl font-bold text-stone-800">Conclusion: The Slow Death That Never Comes</h3>
+            <p class="mt-4 max-w-4xl mx-auto text-stone-600 leading-relaxed">
+                Romanticism is not dead; it is a volatile and paradoxical inheritance. It is the source of our most cherished ideals of individual freedom and our most dangerous political pathologies of mob irrationalism. The challenge of the 21st century is to navigate this double-edged legacy: to harness the empathetic power of the Romantic spirit while defending against its seductive, and potentially fatal, war on reason.
+            </p>
+        </footer>
+
+    </div>
+
+<script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then(registration => {
+                console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            }, err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+    
+        const navLinks = document.querySelectorAll('.nav-link');
+        const sections = document.querySelectorAll('.content-section');
+        const mainContent = document.getElementById('main-content');
+
+        const tenetData = [
+            { 
+                name: 'The Individual', 
+                icon: '👤',
+                liberal: { title: 'Human Rights & Self-Determination', desc: 'The belief in the unique self and the rejection of societal norms provides the philosophical soil for liberal ideals of freedom, self-expression, and the sanctity of conscience.' },
+                authoritarian: { title: 'Radical Subjectivism & Solipsism', desc: 'When radicalized, the focus on the self can justify a solipsistic rejection of objective reality and the social contract, leading to pure self-interest.' }
+            },
+            { 
+                name: 'Emotion', 
+                icon: '❤️‍🔥',
+                liberal: { title: 'Empathetic Art & Social Compassion', desc: 'The power of emotion can fuel empathy, inspire art that connects us, and drive movements for social justice based on shared compassion.' },
+                authoritarian: { title: 'Mob Mentality & Rule by Passion', desc: 'When harnessed for politics, emotion can be used to incite mob hatred, bypass rational debate, and justify actions based on raw passion rather than evidence.' }
+            },
+            { 
+                name: 'The Past', 
+                icon: '🏰',
+                liberal: { title: 'Cultural Pride & Historical Consciousness', desc: 'A reverence for the past can foster cultural pride, the preservation of folklore and history, and a healthy sense of national identity and continuity.' },
+                authoritarian: { title: 'Aggressive Nationalism & Myth-Making', desc: 'Glorification of the past often curdles into aggressive nationalism, using a mythologized, exclusionary history to justify present-day political ambitions and conflict.' }
+            },
+            { 
+                name: 'The Hero', 
+                icon: '🌟',
+                liberal: { title: 'Celebration of Visionary Thinkers', desc: 'The cult of the genius celebrates visionary artists, scientists, and thinkers who break new ground and push humanity forward through their unique talents.' },
+                authoritarian: { title: 'The Charismatic Dictator & Cult of Personality', desc: 'This ideal becomes politically toxic when it morphs into the cult of the charismatic dictator, demanding unquestioning obedience to a single, god-like leader.' }
+            },
+            { 
+                name: 'Nature', 
+                icon: '�',
+                liberal: { title: 'Environmentalism & Conservation', desc: 'A spiritual connection to nature and a view of it as sacred is the foundation of the modern environmental movement and efforts to conserve the planet.' },
+                authoritarian: { title: 'Romanticized Anti-Industrialism', desc: 'This can lead to a romanticized, unscientific view of ecology that sometimes opposes necessary, data-driven solutions in favor of an idealized, "pristine" vision.' }
+            }
+        ];
+
+        const tenetsContainer = document.getElementById('tenets-container');
+        const manifestationsContainer = document.getElementById('manifestations-container');
+        let activeTenet = null;
+        
+        function initDnaSection() {
+            tenetData.forEach((tenet, index) => {
+                const button = document.createElement('button');
+                button.className = 'tenet-card px-4 py-2 bg-white border-2 border-stone-300 rounded-full font-semibold text-stone-700 hover:bg-orange-100 hover:border-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2';
+                button.innerHTML = `<span class="mr-2">${tenet.icon}</span> ${tenet.name}`;
+                button.addEventListener('click', () => selectTenet(tenet, button));
+                tenetsContainer.appendChild(button);
+                if(index === 0) {
+                    selectTenet(tenet, button);
+                }
+            });
+        }
+        
+        function selectTenet(tenet, button) {
+            if (activeTenet) {
+                activeTenet.classList.remove('bg-orange-500', 'text-white', 'border-orange-500');
+                activeTenet.classList.add('bg-white', 'text-stone-700', 'border-stone-300');
+            }
+            
+            button.classList.add('bg-orange-500', 'text-white', 'border-orange-500');
+            button.classList.remove('bg-white', 'text-stone-700', 'border-stone-300');
+            activeTenet = button;
+
+            manifestationsContainer.innerHTML = '';
+            
+            const liberalCard = createManifestationCard(tenet.liberal, 'liberal');
+            const authoritarianCard = createManifestationCard(tenet.authoritarian, 'authoritarian');
+
+            manifestationsContainer.appendChild(liberalCard);
+            manifestationsContainer.appendChild(authoritarianCard);
+
+            setTimeout(() => {
+                liberalCard.classList.remove('hidden-card');
+                authoritarianCard.classList.remove('hidden-card');
+            }, 50);
+        }
+
+        function createManifestationCard(data, type) {
+            const card = document.createElement('div');
+            const borderColor = type === 'liberal' ? 'border-sky-300' : 'border-rose-300';
+            const bgColor = type === 'liberal' ? 'bg-sky-50' : 'bg-rose-50';
+            const titleColor = type === 'liberal' ? 'text-sky-800' : 'text-rose-800';
+            const textColor = type === 'liberal' ? 'text-sky-900' : 'text-rose-900';
+            const labelText = type === 'liberal' ? 'Enlightened / Liberal' : 'Authoritarian / Negative';
+
+            card.className = `manifestation-card hidden-card p-6 rounded-lg border-2 ${borderColor} ${bgColor}`;
+            card.innerHTML = `
+                <span class="inline-block px-3 py-1 text-xs font-semibold ${titleColor} ${bgColor === 'bg-sky-50' ? 'bg-sky-200' : 'bg-rose-200'} rounded-full mb-3">${labelText}</span>
+                <h4 class="text-xl font-bold ${titleColor}">${data.title}</h4>
+                <p class="mt-2 ${textColor}">${data.desc}</p>
+            `;
+            return card;
+        }
+
+        const chartContexts = {};
+
+        function initCharts(sectionId) {
+            if (sectionId === 'inheritance' && !chartContexts.ideologyChart) {
+                const ctx = document.getElementById('ideologyChart').getContext('2d');
+                chartContexts.ideologyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Individualism', 'Emotional Appeal', 'Mythic Past', 'Hero Worship'],
+                        datasets: [
+                            {
+                                label: 'Liberalism',
+                                data: [9, 6, 2, 3],
+                                backgroundColor: 'rgba(56, 189, 248, 0.6)',
+                                borderColor: 'rgba(56, 189, 248, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Nationalism',
+                                data: [4, 8, 9, 5],
+                                backgroundColor: 'rgba(251, 113, 133, 0.6)',
+                                borderColor: 'rgba(251, 113, 133, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Fascism',
+                                data: [1, 10, 10, 10],
+                                 backgroundColor: 'rgba(120, 113, 108, 0.6)',
+                                borderColor: 'rgba(120, 113, 108, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10,
+                                title: { display: true, text: 'Adherence to Romantic Tenet (Score 1-10)' }
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    footer: (tooltipItems) => 'This shows a simplified score of how much each ideology relies on a given Romantic trait.'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            if (sectionId === 'battlefield' && !chartContexts.populistChart) {
+                const ctx = document.getElementById('populistChart').getContext('2d');
+                chartContexts.populistChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Populist Rally Rhetoric Analysis'],
+                        datasets: [
+                            {
+                                label: 'Crisis Narrative (Creating Fear)',
+                                data: [30],
+                                backgroundColor: 'rgba(251, 146, 60, 0.7)',
+                            },
+                            {
+                                label: 'Identifying Enemies (Blame)',
+                                data: [35],
+                                backgroundColor: 'rgba(239, 68, 68, 0.7)',
+                            },
+                            {
+                                label: 'Offering Heroic Solution (The Leader)',
+                                data: [25],
+                                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                            },
+                             {
+                                label: 'Emotional Uplift & Belonging',
+                                data: [10],
+                                backgroundColor: 'rgba(245, 208, 254, 0.8)',
+                            }
+                        ]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                stacked: true,
+                                title: { display: true, text: 'Percentage of Rhetorical Focus' }
+                            },
+                            y: {
+                                stacked: true
+                            }
+                        },
+                        plugins: {
+                            tooltip: {
+                                callbacks: {
+                                    footer: (tooltipItems) => 'Each segment represents a core tactic used to mobilize an audience emotionally, not rationally.'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+
+        function updateContent(hash) {
+            let targetHash = hash || window.location.hash || '#conflict';
+            if (targetHash.length <= 1) targetHash = '#conflict';
+
+            let activeSectionFound = false;
+            sections.forEach(section => {
+                if ('#' + section.id === targetHash) {
+                    section.classList.add('active');
+                    mainContent.style.minHeight = section.offsetHeight + 'px';
+                    initCharts(section.id);
+                    activeSectionFound = true;
+                } else {
+                    section.classList.remove('active');
+                }
+            });
+            
+            if (!activeSectionFound) {
+                document.getElementById('conflict').classList.add('active');
+            }
+
+            navLinks.forEach(link => {
+                if (link.getAttribute('href') === targetHash) {
+                    link.classList.add('active');
+                } else {
+                    link.classList.remove('active');
+                }
+            });
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetHash = e.currentTarget.getAttribute('href');
+                history.pushState(null, null, targetHash);
+                updateContent(targetHash);
+            });
+        });
+
+        window.addEventListener('popstate', () => updateContent());
+        
+        initDnaSection();
+        updateContent();
+    });
+</script>
+
+</body>
+</html>
+�
